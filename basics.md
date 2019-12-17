@@ -93,7 +93,7 @@ func main() {
 Saída: x: 3 - y: 20 - z: 50 - w: 70
 ```
 
-## Contantes
+## Constantes
 
 Para criar uma constante utilize a palavra reservada `const`. Ex:
 ```go
@@ -328,5 +328,27 @@ func function_name(parameter_1 type, ..., parameter_2 type) return_type {
 
 Ex: 
 ```go
+package main
+import "fmt"
 
+func calc(num1 int, num2 int) (int, int) {
+	sum := num1 + num2
+	diff := num1 - num2
+	return sum, diff
+}
+
+func main() {
+	x, y := 15, 10
+
+	sum, diff := calc(x, y)
+	fmt.Println("Sum", sum)
+	fmt.Println("Diff", diff)
+}
+
+Saída: Sum 25
+Diff 5
 ```
+
+## Pacotes
+
+Permite a divisão 
