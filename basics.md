@@ -803,3 +803,58 @@ Final Count: 30
 ```
 
 Esta diferença se pelo fato de, sem a utilização do `mutex`, a variável é acessada e sobrescrita de forma desordenada, o que cria a incoerência no valor.
+
+## Tratamento de erros
+O tratamento de erros no Go é bastante simples. Ex:
+```go
+package main
+import "fmt"
+import "os"
+
+func fileopen(name string) {
+	f, er := os.Open(name)
+
+	if er != nil {
+		fmt.Println(er)
+		return
+	} else {
+		fmt.Println("file opened", f.Name())
+	}
+}
+
+func main() {
+	fileopen("invalid.txt")
+}
+
+Saída: open invalid.txt: no such file or directory
+```
+
+### Erros customizados
+Sobrescreve os erros padrões (e cria novos, caso necessário). Ex:
+```go
+package main
+import "fmt"
+import "os"
+import "errors"
+
+func fileopen(name string) (string, error) {
+	f, er := os.Open(name)
+
+	if er != nil {
+		return "", errors.New("Custom error message: File name is wrong")
+	} else {
+		return f.Name(), nil
+	}
+}
+
+func main() {
+	filename, error := fileopen("invalid.txt")
+	if error != nil {
+		fmt.Println(error)
+	} else {
+		fmt.Println("file opened", filename)
+	}
+}
+
+Saída: Custom error message: File name is wrong
+```
