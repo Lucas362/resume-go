@@ -26,7 +26,7 @@ go run <nome_do_arquivo>
 Exemplo de programa em GO:
 
 ```go
-package Main
+package main
 
 import "fmt"
 
@@ -351,4 +351,223 @@ Diff 5
 
 ## Pacotes
 
-Permite a divisão 
+Permite a divisão do código em diversos arquivos. Sintaxe:
+```go
+import package_name
+```
+
+## Adiamentos
+
+É possível adiar a execução de uma chamada de função através do uso do `defer`. Sintaxe:
+```go
+defer function()
+```
+Ex:
+```go
+package main
+import "fmt"
+
+func exemplo() {
+	fmt.Println("Dentro de exemplo()")
+}
+
+func main() {
+	defer exemplo()
+	fmt.Println("Dentro de main()")
+}
+
+Saída: Dentro de main()
+Dentro de exemplo()
+```
+
+## Ponteiros
+
+Go trabalha com ponteiros da mesma maneira que a linguagem C (ao enos do ponto de vista sintático). Utilizando `&` e `*`. Ex:
+```go
+package main
+import "fmt"
+
+func main() {
+	a := 20
+
+	var b *int = &a
+
+	fmt.Println("Endereço de a:", &a)
+	fmt.Println("Valor de a:", a)
+
+	fmt.Println("Endereço contido em b:", b)
+	fmt.Println("Valor contido em b:", *b)
+
+	*b = *b+1
+
+	fmt.Println("Valor atualizado contido em b:", *b)
+	fmt.Println("Valor atualizado de a", a)
+}
+
+Saída: Endereço de a: 0xc0000140c0
+Valor de a: 20
+Endereço contido em b: 0xc0000140c0
+Valor contido em b: 20
+Valor atualizado contido em b: 21
+Valor atualizado de a 21
+```
+
+## Structures
+
+Conjunto de dados de tipos heterogêneos. Sintaxe:
+```go
+type structname struct {
+	variable_1 variable_1_type
+	variable_2 variable_2_type
+	variable_n variable_n_type
+}
+```
+Ex:
+```go
+type pessoa struct {
+	nome string
+	endereco string
+	idade int
+}
+```
+
+Para declarar uma variável do tipo da struct a sintaxe segue o padrão da declaração comum:
+```go
+var variable_name struct_name
+```
+Ex:
+```go
+var pessoa1 pessoa
+```
+
+Para setar valores de uma struct a sintaxe é:
+```go
+pessoa1.nome = "joão"
+pessoa1.endereco = "rua tal bairro algum cidade top"
+pessoa1.idade = 50
+```
+
+Também é possível criar uma variável com valores iniciais setados. Ex:
+```go
+pessoa2 := pessoa{"judiscleidson", "lugar nenhum", 25}
+```
+
+Exemplo total:
+```go
+package main
+import "fmt"
+
+type pessoa struct {
+	nome string
+	endereco string
+	idade int
+}
+
+func main() {
+	var pessoa1 pessoa
+	pessoa1.nome = "joão"
+	pessoa1.endereco = "rua tal bairro algum cidade top"
+	pessoa1.idade = 50
+
+	pessoa2 := pessoa{"judiscleidson", "lugar nenhum", 25}
+
+	fmt.Println(pessoa1.nome)
+	fmt.Println(pessoa2.nome)
+}
+
+Saída: joão
+judiscleidson
+```
+
+## Métodos
+
+Apesar de Go não ser uma linguagem orientada a objetos, é possível utilizar métodos associados aos tipos de dados utilizando `métodos`. sintaxe:
+```go
+func(variable variable_type) methodName(paramether1 paramether_1_type, paramethern paramether_n_type){}
+```
+Ex:
+```go
+package main
+import "fmt"
+
+type pessoa struct {
+	nome string
+	endereco string
+	idade int
+}
+
+func(p pessoa) display(nome string, idade int) {
+	fmt.Println(p.endereco, nome, idade)
+}
+
+func main() {
+	pessoa1 := pessoa{"pessoa 1", "lugar nenhum", 10}
+	pessoa2 := pessoa{"pessoa 2", "lugar nenhum", 20}
+
+	pessoa1.display(pessoa1.nome, pessoa1.idade)
+	pessoa2.display(pessoa2.nome, pessoa2.idade)
+}
+```
+
+## Goroutines
+`Goroutines` são funções que rodam de forma concorrente com outras funções. O programa não irá esperar pelo fim da execução de uma `goroutine`, diferente do que acontece com as outras funções. Sintaxe:
+```go
+go function_name(paramether_1, paramether_n)
+```
+Como dito anteriormente, o programa não espera pelo fim da execução da `goroutine`, como pode ser visto pelo exemplo a seguir:
+```go
+package main
+import "fmt"
+
+func display() {
+    fmt.Println("Na display")
+
+}
+
+func main() {
+    go display()
+
+    for i:=0; i<5; i++ {
+        fmt.Println("Na main")
+    }
+}
+
+Saída: Na main
+Na main
+Na main
+Na main
+Na main
+```
+Adicionando uma pausa para a execução de `display` acontecer:
+```go
+package main
+import "fmt"
+import "time"
+
+func display() {
+    for i:=0; i<5; i++ {
+        time.Sleep(1*time.Second)
+        fmt.Println("Na display")
+    }
+}
+
+func main() {
+    go display()
+
+    for i:=0; i<5; i++ {
+        time.Sleep(2*time.Second)
+        fmt.Println("Na main")
+    }
+}
+
+Saída: Na display
+Na main
+Na display
+Na display
+Na main
+Na display
+Na display
+Na main
+Na main
+Na main
+```
