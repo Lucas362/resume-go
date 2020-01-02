@@ -858,3 +858,59 @@ func main() {
 
 Saída: Custom error message: File name is wrong
 ```
+
+## Lendo arquivos
+Assim como várias outras linguagens, o Go lê arquivos. Ex:
+```go
+package main
+import "fmt"
+import "io/ioutil"
+
+func main() {
+	data, err := ioutil.ReadFile("data.txt")
+	if err != nil {
+		fmt.Println("File reading error", err)
+		return
+	}
+	fmt.Println("Contents of file:", string(data))
+}
+
+Saída: Contents of file: <conteúdo_do_arquivo>
+
+Obs: o arquivo deve existir em seu computador com o caminho especificado
+```
+
+## Escrevendo arquivos
+Assim como ler, o Go também permite a escrita de arquivos. Ex:
+```go
+package main
+import "fmt"
+import "os"
+
+func main() {
+	f, err := os.Create("file1.txt")
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	l, err := f.WriteString("write Line one")
+	if err != nil {
+		fmt.Println(err)
+		f.Close()
+		return
+	}
+
+	fmt.Println(l, "bytes written")
+	err = f.Close()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
+Saída: 14 bytes written
+
+Obs: agora deve existir um arquivo no mesmo diretório com o conteúdo "write Line one"
+```
