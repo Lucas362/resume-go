@@ -571,3 +571,235 @@ Na main
 Na main
 Na main
 ```
+
+## Channels
+
+`Channel` é um caminho pelo qual as funções comunicam umas com as outras. Sintaxe:
+```go
+channel_variable := make(chan type)
+```
+
+Para enviar dados para um `channel` esta é a sintaxe:
+```go
+channel_variable <- variable_name>
+```
+
+Para receber dados de um `channel` esta é a sintaxe:
+```go
+variable_name := <- channel_variable
+```
+
+É possível fechar o `channel` indicando que a comunicação entre as funções não se comunicaram mais através dele. Sintaxe:
+```go
+close(channel_name)
+```
+
+Também é possível receber o status de um `channel`, ou seja, se ele foi fechado ou não no momento de receber o valor. Sintaxe:
+```go
+variable_name, status := <- channel_variable
+```
+
+Exemplo:
+```go
+package main
+import "fmt"
+import "time"
+
+func add_to_channel(ch chan int) {
+	fmt.Println("Send data")
+	for i:=0; i<10; i++ {
+		ch <- i
+	}
+	close(ch)
+}
+
+func fetch_from_channel(ch chan int) {
+	fmt.Println("Read data")
+	for {
+		x, flag := <- ch
+		if flag == true {
+			fmt.Println(x)
+		} else {
+			fmt.Println("Empty channel")
+			break
+		}
+	}
+}
+
+func main() {
+	ch := make(chan int)
+
+	go add_to_channel(ch)
+	go fetch_from_channel(ch)
+
+	time.Sleep(5 * time.Second)
+	fmt.Println("Inside main()")
+}
+
+Saída: Envia dado
+Lê dado
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+Channel fechado
+Na main()
+```
+
+## Select
+Funciona como um `switch` para `channels`. Ele espera até a inserção de dados em algum dos `channels`. Ex:
+```go
+package main
+import "fmt"
+import "time"
+
+func data1(ch chan string) {
+	time.Sleep(4 * time.Second)
+	ch <- "from data1()"
+}
+
+func data2(ch chan string) {
+	time.Sleep(2 * time.Second)
+	ch <- "from data2()"
+}
+
+func main() {
+	chan1 := make(chan string)
+	chan2 := make(chan string)
+
+	go data1(chan1)
+	go data2(chan2)
+
+	select {
+	case x := <- chan1:
+		fmt.Println(x)
+	case y := <- chan2:
+		fmt.Println(y)
+	}
+}
+
+Saída: from data2()
+```
+
+Também é possível utilizar o `default` no select, que executa sem esperar algum `channel` receber valor. Ex:
+```go
+package main
+import "fmt"
+import "time"
+
+func data1(ch chan string) {
+	time.Sleep(4 * time.Second)
+	ch <- "from data1()"
+}
+
+func data2(ch chan string) {
+	time.Sleep(2 * time.Second)
+	ch <- "from data2()"
+}
+
+func main() {
+	chan1 := make(chan string)
+	chan2 := make(chan string)
+
+	go data1(chan1)
+	go data2(chan2)
+
+	select {
+	case x := <- chan1:
+		fmt.Println(x)
+	case y := <- chan2:
+		fmt.Println(y)
+	default:
+		fmt.Println("Default case")
+	}
+}
+
+Saída: Default case
+```
+
+## Mutex
+É a forma diminuída de mutual exclusion. É utilizado quando não se quer permitir a um recurso ser acessado por múltiplas subrotinas ao mesmo tempo. O `mutex` possui os métodos `lock` e `unlock`. Caso mutex não seja utilizado:
+```go
+package main
+import "fmt"
+import "time"
+import "strconv"
+import "math/rand"
+
+var count = 0
+
+func process(n int) {
+	for i:=0; i<10; i++ {
+		time.Sleep(time.Duration(rand.Int31n(2)) * time.Second)
+		temp := count
+		temp++
+		time.Sleep(time.Duration(rand.Int31n(2)) * time.Second)
+		count = temp
+	}
+	fmt.Println("Count after i="+strconv.Itoa(n)+" Count:", strconv.Itoa(count))
+}
+
+func main() {
+	for i:=1; i<4; i++ {
+		go process(i)
+	}
+
+	time.Sleep(25 * time.Second)
+	fmt.Println("Final Count:", count)
+}
+
+Saída: Count after i=3 Count: 10
+Count after i=1 Count: 14
+Count after i=2 Count: 15
+Final Count: 15
+
+Obs: a saída varia de execução para execução
+```
+
+Com `mutex`:
+```go
+package main
+import "fmt"
+import "time"
+import "sync"
+import "strconv"
+import "math/rand"
+
+var mu sync.Mutex
+var count = 0
+
+func process(n int) {
+	for i:=0; i<10; i++ {
+		time.Sleep(time.Duration(rand.Int31n(2)) * time.Second)
+		mu.Lock()
+		temp := count
+		temp++
+		time.Sleep(time.Duration(rand.Int31n(2)) * time.Second)
+		count = temp
+		mu.Unlock()
+	}
+	fmt.Println("Count after i="+strconv.Itoa(n)+" Count:", strconv.Itoa(count))
+}
+
+func main() {
+	for i:=1; i<4; i++ {
+		go process(i)
+	}
+
+	time.Sleep(25 * time.Second)
+	fmt.Println("Final Count:", count)
+}
+
+Saída: Count after i=3 Count: 21
+Count after i=1 Count: 29
+Count after i=2 Count: 30
+Final Count: 30
+```
+
+Esta diferença se pelo fato de, sem a utilização do `mutex`, a variável é acessada e sobrescrita de forma desordenada, o que cria a incoerência no valor.
