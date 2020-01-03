@@ -215,3 +215,45 @@ Saída: {Eve 6 [Alice Bob] map[city:NY street:1]}
 NY
 Alice
 ```
+
+### Fastjson
+`Fastjson` é um parser feito para o Go, que promete ser até 15 vezes mais rápido que a `encoding/json` (biblioteca utilizada nos exemplos anteriores). Ex:
+```go
+package main
+import "fmt"
+import "github.com/valyala/fastjson"
+
+func main() {
+	// data simula um json neste exemplo
+	data := (`
+		{
+			"Name": "Eve",
+			"Age": 6,
+			"Parents": [
+				"Alice",
+				"Bob"
+			],
+			"address": {
+				"street": "1",
+				"city": "NY"
+			}
+		}
+	`)
+
+	var p fastjson.Parser
+	v, err := p.Parse(data)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(v)
+	fmt.Printf("Tipo: %T\n",v)
+	fmt.Println(v.Get("address","city"))
+	fmt.Println(v.Get("Parents","0"))
+}
+
+Saída: {"Name":"Eve","Age":6,"Parents":["Alice","Bob"],"address":{"street":"1","city":"NY"}}
+Tipo: *fastjson.Value
+"NY"
+"Alice"
+```
