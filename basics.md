@@ -412,7 +412,7 @@ Valor atualizado contido em b: 21
 Valor atualizado de a 21
 ```
 
-## Structures
+## Structs
 
 Conjunto de dados de tipos heterogêneos. Sintaxe:
 ```go
